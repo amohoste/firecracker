@@ -27,6 +27,10 @@ seccompiler = { path = "../seccompiler" }
 snapshot = { path = "../snapshot"}
 utils = { path = "../utils" }
 
+userfaultfd = { path = "../userfaultfd" }
+passfd = { path = "../passfd" }
+
+
 [target.'cfg(target_arch = "x86_64")'.dependencies]
 cpuid = { path = "../cpuid" }
 

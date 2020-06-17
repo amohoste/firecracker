@@ -7,6 +7,12 @@ use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::io::SeekFrom;
 
+// for userfaultfd
+use std::os::unix::io::AsRawFd;
+use std::os::unix::net::UnixListener;
+use userfaultfd::UffdBuilder;
+use passfd::FdPassingExt;
+
 use versionize::{VersionMap, Versionize, VersionizeResult};
 use versionize_derive::Versionize;
 use vm_memory::{
@@ -59,6 +65,8 @@ where
         state: &GuestMemoryState,
         track_dirty_pages: bool,
     ) -> std::result::Result<Self, Error>;
+    /// Registers guest memory for hanlding page faults with an external user-level process
+    fn register_for_upf(&self) -> std::result::Result<(), Error>;
 }
 
 /// Errors associated with dumping guest memory to file.
@@ -74,6 +82,8 @@ pub enum Error {
     PageSize(errno::Error),
     /// Cannot dump memory.
     WriteMemory(GuestMemoryError),
+    /// Cannot register region for user page fault handling.
+    UserPageFault(userfaultfd::Error),
 }
 
 impl Display for Error {
@@ -85,6 +95,7 @@ impl Display for Error {
             CreateRegion(err) => write!(f, "Cannot create memory region: {:?}", err),
             PageSize(err) => write!(f, "Cannot fetch system's page size: {:?}", err),
             WriteMemory(err) => write!(f, "Cannot dump memory: {:?}", err),
+            UserPageFault(err) => write!(f, "Cannot register memory for uPF: {:?}", err),
         }
     }
 }
@@ -178,6 +189,20 @@ impl SnapshotMemory for GuestMemoryMmap {
     ) -> std::result::Result<Self, Error> {
         let mut mmap_regions = Vec::new();
         for region in state.regions.iter() {
+            // userfaultfd requires allocating anonymous memory
+            let mmap_region = GuestRegionMmap::build_guarded(
+                Some(FileOffset::new(
+                    file.try_clone().map_err(Error::FileHandle)?,
+                    region.offset,
+                )),
+                region.size,
+                libc::PROT_READ | libc::PROT_WRITE,
+                libc::MAP_PRIVATE | libc::MAP_ANONYMOUS,
+            )
+            .map(|r| GuestRegionMmap::new(r, GuestAddress(region.base_address)))
+            .map_err(Error::CreateRegion)?
+            .map_err(Error::CreateMemory)?;
+            /*
             let mmap_region = GuestRegionMmap::build_guarded(
                 Some(FileOffset::new(
                     file.try_clone().map_err(Error::FileHandle)?,
@@ -196,11 +221,49 @@ impl SnapshotMemory for GuestMemoryMmap {
             })
             .map_err(Error::CreateRegion)?
             .map_err(Error::CreateMemory)?;
+            */
 
             mmap_regions.push(mmap_region);
         }
 
         Self::from_regions(mmap_regions).map_err(Error::CreateMemory)
+    }
+
+    /// Registers guest memory regions for handling page faults
+    /// with an external user-level process.
+    fn register_for_upf(&self) -> std::result::Result<(), Error> {
+        self.with_regions(|_, region| {
+            info!("DMITRII: restore memory from file, once per region");
+            info!("size={:?}MB, base_address={:?}, last_addr={:?}",
+                region.len()/1024/1024,
+                region.get_host_address(region.to_region_addr(region.start_addr()).unwrap()),
+                region.get_host_address(region.to_region_addr(region.last_addr()).unwrap()));
+
+            let uffd = UffdBuilder::new()
+            .close_on_exec(true)
+            .non_blocking(true)
+            .create()
+            .expect("uffd creation");
+
+            let addr = region.get_host_address(region.to_region_addr(region.start_addr()).unwrap()).unwrap();
+            let len = region.len();
+            info!("Host address of the region's start = {:p}, len={:?}", addr, len);
+            uffd.register(addr as *mut u8 as _, len as u64 as _).expect("uffd.register()");
+
+            let listener = UnixListener::bind("/tmp/sendfd.sock").unwrap();
+            let (stream, _) = listener.accept().unwrap();
+            stream.send_fd(uffd.as_raw_fd()).unwrap();
+
+            info!("Sent the fd!");
+
+            // Cause a page fault on the first page to communicate the start_addr's hVA
+            unsafe{
+                info!("after reg: ptr={:p}, mem value = {:?}, len={:?}", addr, *addr, len)
+            }
+
+            Ok(())
+        })
+        .map_err(Error::UserPageFault)
     }
 }
 
