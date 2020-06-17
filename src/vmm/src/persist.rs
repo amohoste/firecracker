@@ -174,6 +174,8 @@ pub enum LoadSnapshotError {
     CpuVendorMismatch(String),
     /// Snapshot failed sanity checks.
     InvalidSnapshot(String),
+    /// Failed to register guest memory for user page fault handling.
+    UserPageFault(memory_snapshot::Error),
 }
 
 impl Display for LoadSnapshotError {
@@ -189,6 +191,7 @@ impl Display for LoadSnapshotError {
             SnapshotBackingFileMetadata(err) => write!(f, "Cannot retrieve file metadata: {}", err),
             CpuVendorMismatch(err) => write!(f, "Snapshot cpu vendor mismatch: {}", err),
             InvalidSnapshot(err) => write!(f, "Snapshot sanity check failed: {}", err),
+            UserPageFault(err) => write!(f, "Cannot register memory for uPF: {:?}", err),
         }
     }
 }
@@ -396,6 +399,7 @@ pub fn restore_from_snapshot(
         &microvm_state.memory_state,
         track_dirty_pages,
     )?;
+    guest_memory.register_for_upf().map_err(UserPageFault)?;
     builder::build_microvm_from_snapshot(
         event_manager,
         microvm_state,
