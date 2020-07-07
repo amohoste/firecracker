@@ -8,6 +8,7 @@ use std::fs::File;
 use std::io::SeekFrom;
 
 // for userfaultfd
+use std::path::PathBuf;
 use std::os::unix::io::AsRawFd;
 use std::os::unix::net::UnixListener;
 use userfaultfd::UffdBuilder;
@@ -64,9 +65,10 @@ where
         file: &File,
         state: &GuestMemoryState,
         track_dirty_pages: bool,
+        enable_user_page_faults: bool,
     ) -> std::result::Result<Self, Error>;
     /// Registers guest memory for hanlding page faults with an external user-level process
-    fn register_for_upf(&self) -> std::result::Result<(), Error>;
+    fn register_for_upf(&self, &PathBuf) -> std::result::Result<(), Error>;
 }
 
 /// Errors associated with dumping guest memory to file.
@@ -186,8 +188,13 @@ impl SnapshotMemory for GuestMemoryMmap {
         file: &File,
         state: &GuestMemoryState,
         track_dirty_pages: bool,
+        enable_user_page_faults: bool,
     ) -> std::result::Result<Self, Error> {
         let mut mmap_regions = Vec::new();
+        let mut prot = libc::MAP_NORESERVE | libc::MAP_PRIVATE;
+        if enable_user_page_faults {
+            prot = libc::MAP_PRIVATE | libc::MAP_ANONYMOUS;
+        }
         for region in state.regions.iter() {
             // userfaultfd requires allocating anonymous memory
             let mmap_region = GuestRegionMmap::build_guarded(
@@ -197,20 +204,7 @@ impl SnapshotMemory for GuestMemoryMmap {
                 )),
                 region.size,
                 libc::PROT_READ | libc::PROT_WRITE,
-                libc::MAP_PRIVATE | libc::MAP_ANONYMOUS,
-            )
-            .map(|r| GuestRegionMmap::new(r, GuestAddress(region.base_address)))
-            .map_err(Error::CreateRegion)?
-            .map_err(Error::CreateMemory)?;
-            /*
-            let mmap_region = GuestRegionMmap::build_guarded(
-                Some(FileOffset::new(
-                    file.try_clone().map_err(Error::FileHandle)?,
-                    region.offset,
-                )),
-                region.size,
-                libc::PROT_READ | libc::PROT_WRITE,
-                libc::MAP_NORESERVE | libc::MAP_PRIVATE,
+                prot,
             )
             .map(|r| {
                 let mut region = GuestRegionMmap::new(r, GuestAddress(region.base_address))?;
@@ -221,7 +215,6 @@ impl SnapshotMemory for GuestMemoryMmap {
             })
             .map_err(Error::CreateRegion)?
             .map_err(Error::CreateMemory)?;
-            */
 
             mmap_regions.push(mmap_region);
         }
@@ -231,10 +224,9 @@ impl SnapshotMemory for GuestMemoryMmap {
 
     /// Registers guest memory regions for handling page faults
     /// with an external user-level process.
-    fn register_for_upf(&self) -> std::result::Result<(), Error> {
+    fn register_for_upf(&self, sock_file_path: &PathBuf) -> std::result::Result<(), Error> {
         self.with_regions(|_, region| {
-            info!("DMITRII: restore memory from file, once per region");
-            info!("size={:?}MB, base_address={:?}, last_addr={:?}",
+            info!("Guest memory size={:?}MB, base_address={:?}, last_addr={:?}",
                 region.len()/1024/1024,
                 region.get_host_address(region.to_region_addr(region.start_addr()).unwrap()),
                 region.get_host_address(region.to_region_addr(region.last_addr()).unwrap()));
@@ -250,7 +242,7 @@ impl SnapshotMemory for GuestMemoryMmap {
             info!("Host address of the region's start = {:p}, len={:?}", addr, len);
             uffd.register(addr as *mut u8 as _, len as u64 as _).expect("uffd.register()");
 
-            let listener = UnixListener::bind("/tmp/sendfd.sock").unwrap();
+            let listener = UnixListener::bind(sock_file_path).unwrap();
             let (stream, _) = listener.accept().unwrap();
             stream.send_fd(uffd.as_raw_fd()).unwrap();
 
