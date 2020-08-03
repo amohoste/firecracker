@@ -7,6 +7,7 @@ use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::io::SeekFrom;
 
+use logger::info;
 // for userfaultfd
 use std::path::PathBuf;
 use std::os::unix::io::AsRawFd;
@@ -68,7 +69,7 @@ where
         enable_user_page_faults: bool,
     ) -> std::result::Result<Self, Error>;
     /// Registers guest memory for hanlding page faults with an external user-level process
-    fn register_for_upf(&self, &PathBuf) -> std::result::Result<(), Error>;
+    fn register_for_upf(&self, sock_file_path: &PathBuf) -> std::result::Result<(), Error>;
 }
 
 /// Errors associated with dumping guest memory to file.
