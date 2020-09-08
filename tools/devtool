@@ -73,8 +73,7 @@
 DEVCTR_IMAGE_NO_TAG="docker.io/vhiveease/fcuvm_dev"
 
 # Development container tag
-#DEVCTR_IMAGE_TAG="v30"
-DEVCTR_IMAGE_TAG="v16_upf"
+DEVCTR_IMAGE_TAG="v30"
 
 # Development container image (name:tag)
 # This should be updated whenever we upgrade the development container.
@@ -259,8 +258,6 @@ ensure_devctr() {
     # Check if we have the container image available locally. Attempt to
     # download it, if we don't.
     [[ $(docker images -q "$DEVCTR_IMAGE" | wc -l) -gt 0 ]] || {
-        say "About to pull docker image $DEVCTR_IMAGE"
-        get_user_confirmation || die "Aborted."
 
         # Run docker pull 5 times in case it fails - sleep 3 seconds
         # between attempts
