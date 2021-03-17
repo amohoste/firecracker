@@ -69,7 +69,6 @@
 #     would help with reproducible builds (in addition to pinning Cargo.lock)
 
 # Development container image (without tag)
-#DEVCTR_IMAGE_NO_TAG="public.ecr.aws/firecracker/fcuvm"
 DEVCTR_IMAGE_NO_TAG="docker.io/vhiveease/fcuvm_dev"
 
 # Development container tag
