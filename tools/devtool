@@ -69,12 +69,10 @@
 #     would help with reproducible builds (in addition to pinning Cargo.lock)
 
 # Development container image (without tag)
-#DEVCTR_IMAGE_NO_TAG="public.ecr.aws/firecracker/fcuvm"
 DEVCTR_IMAGE_NO_TAG="docker.io/vhiveease/fcuvm_dev"
 
 # Development container tag
-#DEVCTR_IMAGE_TAG="v28"
-DEVCTR_IMAGE_TAG="latest"
+DEVCTR_IMAGE_TAG="v28"
 
 # Development container image (name:tag)
 # This should be updated whenever we upgrade the development container.
