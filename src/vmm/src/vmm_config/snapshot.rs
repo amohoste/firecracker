@@ -52,6 +52,8 @@ pub struct LoadSnapshotParams {
     pub enable_user_page_faults: bool,
     /// Path to the passfd socket.
     pub sock_file_path: PathBuf,
+    /// Setting this flag disables crc snapshot integrity verification.
+    pub disable_crc: bool,
     /// Setting this flag will enable KVM dirty page tracking and will
     /// allow taking subsequent incremental snapshots.
     #[serde(default)]

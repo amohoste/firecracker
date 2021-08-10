@@ -389,7 +389,8 @@ pub fn restore_from_snapshot(
 ) -> std::result::Result<Arc<Mutex<Vmm>>, LoadSnapshotError> {
     use self::LoadSnapshotError::*;
     let track_dirty_pages = params.enable_diff_snapshots;
-    let microvm_state = snapshot_state_from_file(&params.snapshot_path, version_map)?;
+    let disable_crc = params.disable_crc;
+    let microvm_state = snapshot_state_from_file(&params.snapshot_path, version_map, disable_crc)?;
 
     // Some sanity checks before building the microvm.
     snapshot_state_sanity_check(&microvm_state)?;
@@ -416,6 +417,7 @@ pub fn restore_from_snapshot(
 fn snapshot_state_from_file(
     snapshot_path: &PathBuf,
     version_map: VersionMap,
+    disable_crc: bool,
 ) -> std::result::Result<MicrovmState, LoadSnapshotError> {
     use self::LoadSnapshotError::{
         DeserializeMicrovmState, SnapshotBackingFile, SnapshotBackingFileMetadata,
@@ -423,7 +425,11 @@ fn snapshot_state_from_file(
     let mut snapshot_reader = File::open(snapshot_path).map_err(SnapshotBackingFile)?;
     let metadata = std::fs::metadata(snapshot_path).map_err(SnapshotBackingFileMetadata)?;
     let snapshot_len = metadata.len() as usize;
-    Snapshot::load(&mut snapshot_reader, snapshot_len, version_map).map_err(DeserializeMicrovmState)
+    if disable_crc == true {
+        Snapshot::unchecked_load(&mut snapshot_reader, version_map).map_err(DeserializeMicrovmState)
+    } else {
+        Snapshot::load(&mut snapshot_reader, snapshot_len, version_map).map_err(DeserializeMicrovmState)
+    }
 }
 
 fn guest_memory_from_file(
