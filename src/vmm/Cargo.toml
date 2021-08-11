@@ -38,3 +38,7 @@ criterion = "0.3.0"
 [[bench]]
 name = "main"
 harness = false
+
+[[bin]]
+name = "mytest"
+path = "mytest/mytest.rs"

@@ -45,7 +45,7 @@ pub enum Error {
     VsockUnixBackend(VsockUnixBackendError),
 }
 
-#[derive(Clone, Versionize)]
+#[derive(Debug, Clone, Versionize)]
 /// Holds the state of a balloon device connected to the MMIO space.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct ConnectedBalloonState {
@@ -59,7 +59,7 @@ pub struct ConnectedBalloonState {
     pub mmio_slot: MMIODeviceInfo,
 }
 
-#[derive(Clone, Versionize)]
+#[derive(Debug, Clone, Versionize)]
 /// Holds the state of a block device connected to the MMIO space.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct ConnectedBlockState {
@@ -73,7 +73,7 @@ pub struct ConnectedBlockState {
     pub mmio_slot: MMIODeviceInfo,
 }
 
-#[derive(Clone, Versionize)]
+#[derive(Debug, Clone, Versionize)]
 /// Holds the state of a net device connected to the MMIO space.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct ConnectedNetState {
@@ -87,7 +87,7 @@ pub struct ConnectedNetState {
     pub mmio_slot: MMIODeviceInfo,
 }
 
-#[derive(Clone, Versionize)]
+#[derive(Debug, Clone, Versionize)]
 /// Holds the state of a vsock device connected to the MMIO space.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct ConnectedVsockState {
@@ -111,7 +111,7 @@ pub struct ConnectedLegacyState {
     pub mmio_slot: MMIODeviceInfo,
 }
 
-#[derive(Clone, Versionize)]
+#[derive(Debug, Clone, Versionize)]
 /// Holds the device states.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct DeviceStates {

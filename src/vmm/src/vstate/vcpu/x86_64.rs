@@ -378,7 +378,7 @@ impl KvmVcpu {
     }
 }
 
-#[derive(Clone, Versionize)]
+#[derive(Debug, Clone, Versionize)]
 /// Structure holding VCPU kvm state.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct VcpuState {
