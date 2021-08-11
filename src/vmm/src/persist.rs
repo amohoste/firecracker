@@ -33,7 +33,6 @@ use snapshot::Snapshot;
 use versionize::{VersionMap, Versionize, VersionizeResult};
 use versionize_derive::Versionize;
 use vm_memory::GuestMemoryMmap;
-use devices::virtio::block::persist::BlockState;
 
 #[cfg(target_arch = "x86_64")]
 const FC_V0_23_SNAP_VERSION: u16 = 1;
@@ -397,9 +396,7 @@ pub fn restore_from_snapshot(
     if *new_snapshot_path != "" {
         let n = microvm_state.device_states.block_devices.len();
         for i in 1..n {
-            let dev_state = &microvm_state.device_states.block_devices[i].device_state;
-            let disk_path = &dev_state.disk_path;
-            if *disk_path.contains("fc-dev-thinpool-") {
+            if microvm_state.device_states.block_devices[i].device_state.disk_path.contains("fc-dev-thinpool-") {
                 microvm_state.device_states.block_devices[i].device_state.disk_path = new_snapshot_path.clone();
             }
         }
