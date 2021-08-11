@@ -7,7 +7,7 @@ use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use std::fmt::{Display, Formatter, Debug, Formatter, Result};
+use std::fmt::{Display, Formatter, Debug, Result};
 use crate::builder::{self, StartMicrovmError};
 use crate::device_manager::persist::Error as DevicePersistError;
 use crate::mem_size_mib;
