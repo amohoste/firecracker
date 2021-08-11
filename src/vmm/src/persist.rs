@@ -64,7 +64,7 @@ pub struct MicrovmState {
 
 impl Debug for MicrovmState {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "VmInfo: {:?}\nDevice states: {:?}", self.device_states)
+        write!(f, "VmInfo: {:?}\nDevice states: {:?}", self.vm_info, self.device_states)
     }
 }
 

@@ -138,7 +138,7 @@ pub struct DeviceStates {
 
 impl fmt::Debug for DeviceStates {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Blocks states: {:?}", block)
+        write!(f, "Blocks states: {:?}", self.block_devices)
     }
 }
 
