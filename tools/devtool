@@ -673,6 +673,16 @@ cmd_build() {
 
     ret=$?
 
+    run_devctr \
+            --user "$(id -u):$(id -g)" \
+            --workdir "$CTR_FC_ROOT_DIR/src/vmm" \
+            ${extra_args} \
+            -- \
+            cargo build \
+                --target-dir "$CTR_CARGO_TARGET_DIR" \
+                "${cargo_args[@]}"
+        ret=$?
+
     # If `cargo build` was successful, let's copy the binaries to a more
     # accessible location.
     [ $ret -eq 0 ] && {
@@ -680,6 +690,7 @@ cmd_build() {
         say "Build successful."
         say "Binaries placed under $cargo_bin_dir"
     }
+
 
     return $ret
 }
