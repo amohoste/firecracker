@@ -420,6 +420,17 @@ pub fn restore_from_snapshot(
     let track_dirty_pages = params.enable_diff_snapshots;
     let microvm_state = snapshot_state_from_file(&params.snapshot_path, version_map)?;
 
+    let new_snapshot_path = &params.new_snapshot_path;
+
+    if *new_snapshot_path != "" {
+        let n = microvm_state.device_states.block_devices.len();
+        for i in 1..n {
+            let dev_state = &microvm_state.device_states.block_devices[i].device_state;
+            let root_path = dev_state.root_path;
+        }
+
+    }
+
     // Some sanity checks before building the microvm.
     snapshot_state_sanity_check(&microvm_state)?;
 
