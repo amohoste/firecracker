@@ -14,6 +14,7 @@ use versionize::{VersionMap, Versionize, VersionizeError, VersionizeResult};
 use versionize_derive::Versionize;
 use virtio_gen::virtio_blk::VIRTIO_BLK_F_RO;
 use vm_memory::GuestMemoryMmap;
+use std::fmt;
 
 use super::*;
 
@@ -60,6 +61,12 @@ pub struct BlockState {
     disk_path: String,
     virtio_state: VirtioDeviceState,
     rate_limiter_state: RateLimiterState,
+}
+
+impl fmt::Debug for BlockState {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Id: {}, disk_path: {}", self.id, self.disk_path)
+    }
 }
 
 impl BlockState {

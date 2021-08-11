@@ -3,11 +3,11 @@
 
 //! Defines state structures for saving/restoring a Firecracker microVM.
 
-use std::fmt::{Display, Formatter};
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+use std::fmt;
 
 use crate::builder::{self, StartMicrovmError};
 use crate::device_manager::persist::Error as DevicePersistError;
@@ -48,7 +48,7 @@ pub struct VmInfo {
 }
 
 /// Contains the necesary state for saving/restoring a microVM.
-#[derive(Debug, Versionize)]
+#[derive(Versionize)]
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct MicrovmState {
     /// Miscellaneous VM info.
@@ -61,6 +61,12 @@ pub struct MicrovmState {
     pub vcpu_states: Vec<VcpuState>,
     /// Device states.
     pub device_states: DeviceStates,
+}
+
+impl fmt::Debug for MicrovmState {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Device states: {:?}", self.device_states)
+    }
 }
 
 /// Errors related to saving and restoring Microvm state.

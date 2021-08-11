@@ -8,7 +8,7 @@ use std::result::Result;
 use std::sync::{Arc, Mutex};
 
 use super::mmio::*;
-
+use std::fmt;
 #[cfg(target_arch = "aarch64")]
 use arch::DeviceType;
 use devices::virtio::balloon::persist::{BalloonConstructorArgs, BalloonState};
@@ -45,7 +45,7 @@ pub enum Error {
     VsockUnixBackend(VsockUnixBackendError),
 }
 
-#[derive(Debug, Clone, Versionize)]
+#[derive(Clone, Versionize)]
 /// Holds the state of a balloon device connected to the MMIO space.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct ConnectedBalloonState {
@@ -59,7 +59,7 @@ pub struct ConnectedBalloonState {
     pub mmio_slot: MMIODeviceInfo,
 }
 
-#[derive(Debug, Clone, Versionize)]
+#[derive(Clone, Versionize)]
 /// Holds the state of a block device connected to the MMIO space.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct ConnectedBlockState {
@@ -73,7 +73,14 @@ pub struct ConnectedBlockState {
     pub mmio_slot: MMIODeviceInfo,
 }
 
-#[derive(Debug, Clone, Versionize)]
+impl fmt::Debug for ConnectedBlockState {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Device id: {}, device state: {:?}", self.device_id, self.device_state)
+    }
+}
+
+
+#[derive(Clone, Versionize)]
 /// Holds the state of a net device connected to the MMIO space.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct ConnectedNetState {
@@ -87,7 +94,7 @@ pub struct ConnectedNetState {
     pub mmio_slot: MMIODeviceInfo,
 }
 
-#[derive(Debug, Clone, Versionize)]
+#[derive(Clone, Versionize)]
 /// Holds the state of a vsock device connected to the MMIO space.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct ConnectedVsockState {
@@ -111,7 +118,7 @@ pub struct ConnectedLegacyState {
     pub mmio_slot: MMIODeviceInfo,
 }
 
-#[derive(Debug, Clone, Versionize)]
+#[derive(Clone, Versionize)]
 /// Holds the device states.
 // NOTICE: Any changes to this structure require a snapshot version bump.
 pub struct DeviceStates {
@@ -127,6 +134,12 @@ pub struct DeviceStates {
     /// Balloon device state.
     #[version(start = 2, ser_fn = "balloon_serialize")]
     pub balloon_device: Option<ConnectedBalloonState>,
+}
+
+impl fmt::Debug for DeviceStates {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Blocks states: {:?}", block)
+    }
 }
 
 impl DeviceStates {
