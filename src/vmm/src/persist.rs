@@ -7,8 +7,7 @@ use std::fs::{File, OpenOptions};
 use std::io;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use std::fmt;
-
+use std::fmt::{Display, Formatter, Debug, Formatter, Result};
 use crate::builder::{self, StartMicrovmError};
 use crate::device_manager::persist::Error as DevicePersistError;
 use crate::mem_size_mib;
@@ -63,9 +62,9 @@ pub struct MicrovmState {
     pub device_states: DeviceStates,
 }
 
-impl fmt::Debug for MicrovmState {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Device states: {:?}", self.device_states)
+impl Debug for MicrovmState {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(f, "VmInfo: {:?}\nDevice states: {:?}", self.device_states)
     }
 }
 
