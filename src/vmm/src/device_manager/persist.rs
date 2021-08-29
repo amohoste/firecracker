@@ -333,7 +333,9 @@ impl<'a> Persist<'a> for MMIODeviceManager {
                     BlockConstructorArgs { mem: mem.clone() },
                     &block_state.device_state,
                 )
-                .map_err(Error::Block)?,
+                .map_err(|err| format!("{{ \"Err\": {} \"path\": {} }}",
+                                       err.to_string(),
+                                       &block_state.device_state.disk_path))?, // .map_err(Error::Block)?,
             ));
 
             restore_helper(
