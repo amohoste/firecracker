@@ -45,6 +45,13 @@ pub enum Error {
     VsockUnixBackend(VsockUnixBackendError),
 }
 
+custom_error! {ProgramError
+    Io {
+        source: io::Error,
+        path: PathBuf
+    } = @{format!("{path}: {source}", source=source, path=path.display())},
+}
+
 #[derive(Clone, Versionize)]
 /// Holds the state of a balloon device connected to the MMIO space.
 // NOTICE: Any changes to this structure require a snapshot version bump.
@@ -333,9 +340,10 @@ impl<'a> Persist<'a> for MMIODeviceManager {
                     BlockConstructorArgs { mem: mem.clone() },
                     &block_state.device_state,
                 )
-                .map_err(|err| Err(VersionizeError::Semantic(format!("{{ \"Err\": {} \"path\": {} }}",
-                                       err.to_string(),
-                                       &block_state.device_state.disk_path))))?, // .map_err(Error::Block)?,
+                    .map_err(|e| ProgramError::Io {
+                        source: e,
+                        path: &block_state.device_state.disk_path,
+                    })?, // .map_err(Error::Block)?,
             ));
 
             restore_helper(
