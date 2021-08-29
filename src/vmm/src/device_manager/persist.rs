@@ -30,6 +30,8 @@ use versionize::{VersionMap, Versionize, VersionizeError, VersionizeResult};
 use versionize_derive::Versionize;
 use vm_memory::GuestMemoryMmap;
 
+use custom_error::custom_error;
+
 /// Errors for (de)serialization of the MMIO device manager.
 #[derive(Debug)]
 pub enum Error {
