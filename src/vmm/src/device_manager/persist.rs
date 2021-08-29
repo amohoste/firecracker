@@ -48,7 +48,7 @@ pub enum Error {
     VsockUnixBackend(VsockUnixBackendError),
 }
 
-custom_error! {ProgramError
+custom_error! {pub ProgramError
     Io {
         source: io::Error,
         path: String
