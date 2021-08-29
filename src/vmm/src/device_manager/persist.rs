@@ -344,7 +344,7 @@ impl<'a> Persist<'a> for MMIODeviceManager {
                 )
                     .map_err(|e| ProgramError::Io {
                         source: e,
-                        path: &block_state.device_state.disk_path,
+                        path: block_state.device_state.disk_path.clone(),
                     })?, // .map_err(Error::Block)?,
             ));
 
