@@ -328,6 +328,7 @@ impl<'a> Persist<'a> for MMIODeviceManager {
         }
 
         for block_state in &state.block_devices {
+            println!("Block state path {0}", block_state.device_state.disk_path.clone());
             let device = Arc::new(Mutex::new(
                 Block::restore(
                     BlockConstructorArgs { mem: mem.clone() },
