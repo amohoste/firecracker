@@ -48,7 +48,6 @@ pub enum Error {
     VsockUnixBackend(VsockUnixBackendError),
 }
 
-#[derive(Debug)]
 custom_error! {ProgramError
     Io {
         source: io::Error,
