@@ -50,8 +50,8 @@ pub enum Error {
 custom_error! {ProgramError
     Io {
         source: io::Error,
-        path: PathBuf
-    } = @{format!("{path}: {source}", source=source, path=path.display())},
+        path: String
+    } = @{format!("{path}: {source}", source=source, path=path)},
 }
 
 #[derive(Clone, Versionize)]
