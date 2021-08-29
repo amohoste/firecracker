@@ -37,6 +37,7 @@ use custom_error::custom_error;
 pub enum Error {
     Balloon(BalloonError),
     Block(io::Error),
+    Block2(ProgramError),
     EventManager(EventMgrError),
     DeviceManager(super::mmio::Error),
     MmioTransport,
@@ -47,6 +48,7 @@ pub enum Error {
     VsockUnixBackend(VsockUnixBackendError),
 }
 
+#[derive(Debug)]
 custom_error! {ProgramError
     Io {
         source: io::Error,
@@ -342,10 +344,10 @@ impl<'a> Persist<'a> for MMIODeviceManager {
                     BlockConstructorArgs { mem: mem.clone() },
                     &block_state.device_state,
                 )
-                    .map_err(|e| ProgramError::Io {
+                    .map_err(|e| Error::Block2(ProgramError::Io {
                         source: e,
                         path: block_state.device_state.disk_path.clone(),
-                    }), // .map_err(Error::Block)?,
+                    }))?, // .map_err(Error::Block)?,
             ));
 
             restore_helper(
