@@ -396,7 +396,9 @@ pub fn restore_from_snapshot(
     if ! new_snapshot_path.eq("") {
         let n = microvm_state.device_states.block_devices.len();
         for i in 1..n {
+            println!("Checking {0}", microvm_state.device_states.block_devices[i].device_state.disk_path);
             if microvm_state.device_states.block_devices[i].device_state.disk_path.contains("fc-dev-thinpool-") {
+                println!("Contains");
                 microvm_state.device_states.block_devices[i].device_state.disk_path = new_snapshot_path.clone();
             }
         }
