@@ -14,7 +14,7 @@ pub mod pseudo;
 pub mod virtio;
 
 pub use self::bus::{Bus, BusDevice, Error as BusError};
-use crate::virtio::{QueueError, VsockError};
+use crate::virtio::{QueueError};
 use logger::{error, IncMetric, METRICS};
 
 // Function used for reporting error in terms of logging
@@ -43,6 +43,4 @@ pub enum Error {
     MalformedDescriptor,
     /// Error during queue processing.
     QueueError(QueueError),
-    /// Vsock device error.
-    VsockError(VsockError),
 }

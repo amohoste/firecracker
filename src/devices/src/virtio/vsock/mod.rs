@@ -99,8 +99,6 @@ pub enum VsockError {
     BufDescTooSmall,
     /// The vsock data/buffer virtio descriptor is expected, but missing.
     BufDescMissing,
-    /// Empty queue
-    EmptyQueue,
     /// EventFd error
     EventFd(std::io::Error),
     /// Chained GuestMemoryMmap error.
