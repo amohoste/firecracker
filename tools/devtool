@@ -72,8 +72,8 @@
 DEVCTR_IMAGE_NO_TAG="docker.io/amohoste/fcuvm_dev"
 
 # Development container tag
-#DEVCTR_IMAGE_TAG="v30"
-DEVCTR_IMAGE_TAG="v16_upf"
+DEVCTR_IMAGE_TAG="v30"
+#DEVCTR_IMAGE_TAG="v16_upf"
 
 # Development container image (name:tag)
 # This should be updated whenever we upgrade the development container.
