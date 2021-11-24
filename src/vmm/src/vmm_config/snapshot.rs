@@ -50,6 +50,8 @@ pub struct LoadSnapshotParams {
     pub mem_file_path: PathBuf,
     /// Setting this flag enables user page faults handling by a different process.
     pub enable_user_page_faults: bool,
+    /// Setting this string to nonempty changes the snapshot device
+    pub new_snapshot_path: String,
     /// Path to the passfd socket.
     pub sock_file_path: PathBuf,
     /// Setting this flag will enable KVM dirty page tracking and will

@@ -69,7 +69,7 @@
 #     would help with reproducible builds (in addition to pinning Cargo.lock)
 
 # Development container image (without tag)
-DEVCTR_IMAGE_NO_TAG="docker.io/vhiveease/fcuvm_dev"
+DEVCTR_IMAGE_NO_TAG="docker.io/amohoste/fcuvm_dev"
 
 # Development container tag
 #DEVCTR_IMAGE_TAG="v30"

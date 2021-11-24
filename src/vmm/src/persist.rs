@@ -418,7 +418,18 @@ pub fn restore_from_snapshot(
 ) -> std::result::Result<Arc<Mutex<Vmm>>, LoadSnapshotError> {
     use self::LoadSnapshotError::*;
     let track_dirty_pages = params.enable_diff_snapshots;
-    let microvm_state = snapshot_state_from_file(&params.snapshot_path, version_map)?;
+    let mut microvm_state = snapshot_state_from_file(&params.snapshot_path, version_map)?;
+
+    let new_snapshot_path = &params.new_snapshot_path;
+
+    if ! new_snapshot_path.eq("") {
+        let n = microvm_state.device_states.block_devices.len();
+        for i in 0..n {
+            if microvm_state.device_states.block_devices[i].device_state.disk_path.contains("fc-dev-thinpool-") {
+                microvm_state.device_states.block_devices[i].device_state.disk_path = new_snapshot_path.clone();
+            }
+        }
+    }
 
     // Some sanity checks before building the microvm.
     snapshot_state_sanity_check(&microvm_state)?;
